@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 
-use App\Models\{Product, User};
+use App\Models\{Product, User, Category};
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Validator;
+use Str;
 
 class ProductController extends Controller
 {
@@ -20,7 +21,7 @@ class ProductController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Product/Index', [
-            'data' => Product::get()
+            'data' => Product::with('category')->get()
         ]);
     }
 
@@ -29,7 +30,19 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Product/Create');
+        return Inertia::render('Admin/Product/Create', [
+            'status_options' => config('constants.status'),
+            'categories' => Category::get()
+        ]);
+    }
+
+    private function rules()
+    {
+        return $rules = [
+            'title' => ['required'],
+            'price' => ['required', 'numeric'],
+            'category_id' => ['required','exists:categories,id'],
+        ];
     }
 
     /**
@@ -37,16 +50,32 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'title' => ['required']
-        ])->validate();
-   
-        Product::create([
-            'category_id' => $request->category_id,
+        $rules = $this->rules();
+
+        if($request->hasFile('file'))
+        {
+            $rules['file'] = ['image'];
+        }
+
+        $msg = [
+            'category_id' => 'Please select category'
+        ];
+
+        Validator::make($request->all(),$rules, $msg)->validate();
+
+        $data = [
             'title' => $request->title,
+            'category_id' => $request->category_id,
             'price' => $request->price,
-            'status' => $request->status?$request->status:'Active'
-        ]);
+            'status' => $request->status
+        ];
+
+        if($request->hasFile('file'))
+        {
+            $data['image'] = $this->fileUpload($request);
+        }
+   
+        Product::create($data);
     
         return redirect()->route('admin.product.index');
     }
@@ -65,14 +94,24 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         return Inertia::render('Admin/Product/Edit', [
+            'status_options' => config('constants.status'),
+            'categories' => Category::select('id','title')->get(),
             'product' => [
                 'id' => $product->id,
-                'price' => $product->price,
+                'category_id' => $product->category_id,
                 'title' => $product->title,
-                'status' => $product->status,
-                'image' => $product->image
+                'slug' => $product->slug,
+                'price' => $product->price,
+                'image' => asset('uploads/'.$product->image),
+                'status' => $product->status
             ]
         ]);
+    }
+
+    private function fileUpload($request) {
+        $fileName = Str::slug($request->title).'-'.time().'.'.$request->file->extension();  
+        $request->file->move(public_path('uploads'), $fileName);
+        return $fileName;
     }
 
     /**
@@ -80,21 +119,25 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product)
     {
-        Validator::make($request->all(), [
-            'title' => ['required']
-        ])->validate();
+        $rules = $this->rules();
 
-        $fileName = time().'.'.$request->file->extension();  
-        $request->file->move(public_path('uploads'), $fileName);
-            
+        if($request->hasFile('file'))
+        {
+            $rules['file'] = ['image'];
+        }
+
+        Validator::make($request->all(),$rules)->validate();
+
         $data = [
+            'category_id' => $request->category_id,
             'title' => $request->title,
             'price' => $request->price,
+            'status' => $request->status
         ];
 
-        if($request->filled('status'))
+        if($request->hasFile('file'))
         {
-            $data['status'] = $request->status;
+            $data['image'] = $this->fileUpload($request);
         }
 
         $product->update($data);

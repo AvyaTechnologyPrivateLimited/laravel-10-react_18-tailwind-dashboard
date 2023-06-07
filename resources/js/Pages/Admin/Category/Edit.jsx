@@ -1,15 +1,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
-import React, { useState } from 'react';
 
-export default function Create({ auth }) {
-
-    const [file, setFile] = useState(null);
+export default function Edit({ auth, status_options }) {
 
     const { category } = usePage().props;
     const { data, setData, post, errors, progress } = useForm({
         title: category.title || "",
-        status: category.status || "",
+        status: category.status,
         image: '/uploads/' + category.image || "",
         file: "",
     });
@@ -19,6 +16,9 @@ export default function Create({ auth }) {
         setData('file', file);
       };
 
+    const handleOptionChange = (option) => {
+        setData('status', option.target.value);
+    };
   
     function handleSubmit(e) {
         e.preventDefault();
@@ -82,18 +82,23 @@ export default function Create({ auth }) {
                                 </span>
                                 </div>
                                 <div className="mb-4">
+                                
                                 <label className="block text-gray-700 text-sm font-bold mb-2">
                                     Status
                                 </label>
-                                
-                                <select onChange={(e) =>
-                                        setData("status", e.target.value)
-                                    }
+                                <select 
+                                    value={category.status}
+                                    onChange={handleOptionChange}
+                                    name="status"
                                     id="status"
-                                    className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" id="status" name="status">
-                                    <option value='Active'>Active</option>
-                                    <option value='Inactive'>Inactive</option>
+                                    className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="status" name="status">
+                                    {status_options.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
                                 </select>
+
                                 <span className="text-red-600">
                                     {errors.status}
                                 </span>

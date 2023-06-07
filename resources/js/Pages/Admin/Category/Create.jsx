@@ -1,13 +1,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, usePage, Link } from '@inertiajs/react';
-import React, { useState } from 'react';
-import Select from 'react-select'
 
 export default function Create({ auth, status_options }) {
 
     const { data, setData, post, errors, progress } = useForm({
         title: "",
-        status: "",
+        status: status_options[0]['label'],
         file: "",
     });
 
@@ -17,7 +15,7 @@ export default function Create({ auth, status_options }) {
     };
 
     const handleOptionChange = (option) => {
-        setData('status', option.target.status);
+        setData('status', option.target.value);
     };
   
     function handleSubmit(e) {
@@ -53,7 +51,7 @@ export default function Create({ auth, status_options }) {
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                                     id="title" 
                                     type="text" 
-                                    placeholder="Titel"
+                                    placeholder="Title"
                                     value={data.title}
                                     onChange={(e) =>
                                         setData("title", e.target.value)
@@ -68,7 +66,7 @@ export default function Create({ auth, status_options }) {
                                     Icon
                                 </label>
                                 <input 
-                                    className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline" 
+                                    className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                                     type="file"
                                     placeholder="Icon"
                                     name="file"
@@ -81,14 +79,20 @@ export default function Create({ auth, status_options }) {
                                 </span>
                                 </div>
                                 <div className="mb-4">
-                                
+                                <label className="block text-gray-700 text-sm font-bold mb-2">
+                                    Status
+                                </label>
                                 <select
+                                className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                                 name="status"
                                 id="status"
                                 onChange={handleOptionChange}
                                 >
-                                    <option value="Md">Asif</option>
-                                    <option value="Anand">Bhatt</option>
+                                {status_options.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
                                 </select>
                                 <span className="text-red-600">
                                     {errors.status}

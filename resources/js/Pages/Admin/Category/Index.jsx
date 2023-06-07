@@ -33,12 +33,13 @@ export default function Index({ auth, data }) {
                                 <th className='py-2'>Icon</th>
                                 <th className='py-2'>Title</th>
                                 <th className='py-2'>Slug</th>
+                                <th className='py-2'>Total Products</th>
                                 <th className='py-2'>Status</th>
                                 <th className='py-2'>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map(({ id, image, title, slug, status }) => (
+                            {data.map(({ id, image, title, slug, status, products_count }) => (
                                 <tr key={id} className="">
                                     <td className="border-t py-2">
                                         {id}
@@ -53,6 +54,9 @@ export default function Index({ auth, data }) {
                                     </td>
                                     <td className="border-t py-2">
                                         {slug}
+                                    </td>
+                                    <td className="border-t py-2">
+                                        {products_count}
                                     </td>
                                     <td className="border-t py-2">
                                         {status=='Active' ? (<span className='badge badge-success'>Active</span>) : (<span className='badge badge-dark'>Inactive</span>)}

@@ -21,7 +21,7 @@ class CategoryController extends Controller
     public function index()
     {
         return Inertia::render('Admin/Category/Index', [
-            'data' => Category::get()
+            'data' => Category::withCount('products')->get()
         ]);
     }
 
@@ -40,7 +40,6 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        return $request->all();
         $rules = ['title' => ['required']];
 
         if($request->hasFile('file'))
@@ -52,7 +51,7 @@ class CategoryController extends Controller
 
         $data = [
             'title' => $request->title,
-            'status' => $request->status?$request->status:'Active'
+            'status' => $request->status
         ];
 
         if($request->hasFile('file'))
@@ -79,6 +78,7 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         return Inertia::render('Admin/Category/Edit', [
+            'status_options' => config('constants.status'),
             'category' => [
                 'id' => $category->id,
                 'title' => $category->title,
@@ -104,16 +104,12 @@ class CategoryController extends Controller
 
         $data = [
             'title' => $request->title,
+            'status' => $request->status
         ];
 
         if($request->hasFile('file'))
         {
             $data['image'] = $this->fileUpload($request);
-        }
-
-        if($request->filled('status'))
-        {
-            $data['status'] = $request->status;
         }
 
         $category->update($data);

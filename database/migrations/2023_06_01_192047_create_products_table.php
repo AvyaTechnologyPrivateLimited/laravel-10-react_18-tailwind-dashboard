@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('slug');
             $table->integer('price');
             $table->string('image')->nullable();
-            $table->enum('status', ['Active', 'Inactive']);
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->softDeletes();
             $table->timestamps();
         });

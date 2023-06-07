@@ -12,7 +12,7 @@ class Product extends Model
 {
     use HasFactory, SoftDeletes, HasSlug;
     
-    protected $fillable = ['category_id', 'title', 'price', 'image', 'status'];
+    protected $fillable = ['category_id', 'slug', 'title', 'price', 'image', 'status'];
 
     /**
      * Get the options for generating the slug.
@@ -22,5 +22,10 @@ class Product extends Model
         return SlugOptions::create()
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
